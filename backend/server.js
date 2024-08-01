@@ -8,17 +8,25 @@ dotenv.config();
 const app = express();
 
 // Middleware
-app.use(cors());
 app.use(express.json());
-
-// DB Config
-const db = process.env.MONGO_URI;
-mongoose.connect(db, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log('MongoDB Connected'))
-  .catch(err => console.log(err));
+app.use(cors());
 
 // Routes
-app.use('/api/users', require('./routes/users'));
+const userRoutes = require('./routes/users');
+app.use('/api/users', userRoutes);
+
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
+
+mongoose.connect(process.env.MONGO_URI, {
+    // useNewUrlParser: true,
+    // useUnifiedTopology: true,
+})
+.then(() => {
+    app.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+    });
+})
+.catch(err => {
+    console.error(err);
+});
