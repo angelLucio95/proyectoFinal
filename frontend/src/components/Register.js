@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Register = () => {
   const [username, setUsername] = useState('');
@@ -14,10 +16,12 @@ const Register = () => {
     console.log("Intentando registrar:", { username, email, password });
     try {
       const res = await axios.post('http://localhost:5001/api/users/register', newUser);
-      localStorage.setItem('token', res.data.token);
+      toast.success(res.data.message);
       navigate('/login');
     } catch (err) {
-      console.error(err.response.data);
+      const errorMessage = err.response?.data?.message || 'Error al registrar';
+      toast.error(errorMessage);
+      console.error(errorMessage);
     }
   };
 
