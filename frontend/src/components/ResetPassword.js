@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 const ResetPassword = () => {
   const { token } = useParams();
@@ -20,17 +21,20 @@ const ResetPassword = () => {
       const res = await axios.post(`http://localhost:5001/api/users/reset-password/${token}`, { password });
       console.log(res.data);
       setMessage('Contraseña restablecida correctamente.');
+      toast.success('Contraseña restablecida correctamente.');
       setTimeout(() => {
         navigate('/login');
-      }, 2000);
+      }, 5000);
     } catch (err) {
       if (err.response && err.response.status === 400) {
         setMessage('Enlace inválido o expirado.');
+        toast.error('Enlace inválido o expirado.');
         setTimeout(() => {
           navigate('/login');
         }, 2000);
       } else {
         setMessage('Error al restablecer la contraseña.');
+        toast.error('Error al restablecer la contraseña.');
       }
     }
   };

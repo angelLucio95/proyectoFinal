@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { toast } from 'react-toastify';
 
 const RestablecerPassword = () => {
   const [email, setEmail] = useState('');
@@ -10,9 +11,10 @@ const RestablecerPassword = () => {
     try {
       const res = await axios.post('http://localhost:5001/api/users/forgot-password', { email });
       setMessage(res.data.message);
-      
+      toast.success('Correo de restablecimiento enviado.');
     } catch (err) {
       setMessage('Error al enviar el correo de restablecimiento');
+      toast.error('Error al enviar el correo de restablecimiento.');
     }
   };
 

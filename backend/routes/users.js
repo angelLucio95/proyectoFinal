@@ -44,8 +44,8 @@ router.get('/confirm/:token', async (req, res) => {
           return res.status(404).send('Usuario no encontrado.');
       }
 
-      user.isActive = true; // Actualiza el campo isActive
-      await user.save(); // Guarda los cambios en la base de datos
+      user.isActive = true; 
+      await user.save(); 
 
       res.send('Cuenta activada correctamente.');
   } catch (error) {
