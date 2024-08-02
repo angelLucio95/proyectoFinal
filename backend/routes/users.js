@@ -34,6 +34,25 @@ const validatePassword = (password) => {
   return null;
 };
 
+router.get('/confirm/:token', async (req, res) => {
+  try {
+    const { token } = req.params;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    const user = await User.findById(decoded.userId);
+    if (!user) {
+      return res.status(404).send('Usuario no encontrado');
+    }
+
+    user.isActive = true; 
+    await user.save();
+
+    res.send('Cuenta activada con éxito');
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error al activar la cuenta');
+  }
+});
 // Ruta de registro
 router.post('/register', async (req, res) => {
   const { username, email, password } = req.body;
