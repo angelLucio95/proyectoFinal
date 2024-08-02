@@ -4,6 +4,8 @@ import Login from './components/Login';
 import Register from './components/Register';
 import Dashboard from './components/Dashboard';
 import PrivateRoute from './components/PrivateRoute';
+import RestablecerPassword from './components/RestablecerPassword';
+import ResetPassword from './components/ResetPassword';
 
 function App() {
   return (
@@ -14,6 +16,9 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+          <Route path="/restablecer-password" element={<RestablecerPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
+          <Route path="*" element={<Navigate to="/login" />} /> {/* Catch-all route */}
         </Routes>
       </div>
     </Router>

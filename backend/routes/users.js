@@ -2,10 +2,9 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
-const { sendConfirmationEmail } = require('../services/mailer'); 
+const { sendConfirmationEmail, sendResetPasswordEmail } = require('../services/mailer'); // Importar funciones en una línea
 const router = express.Router();
 
-// Validar la contraseña según las reglas establecidas
 const validatePassword = (password) => {
   const minLength = 8;
   const hasNumber = /[0-9]/;
@@ -55,7 +54,47 @@ router.get('/confirm/:token', async (req, res) => {
   }
 });
 
-// Ruta de registro
+router.post('/forgot-password', async (req, res) => {
+  const { email } = req.body;
+  try {
+      const user = await User.findOne({ email });
+      if (!user) {
+          return res.status(404).json({ message: 'Usuario no encontrado' });
+      }
+
+      const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+      sendResetPasswordEmail(email, token);
+
+      res.json({ message: 'Correo de restablecimiento enviado' });
+  } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: 'Error del servidor' });
+  }
+});
+
+router.post('/reset-password/:token', async (req, res) => {
+  const { token } = req.params;
+  const { password } = req.body;
+
+  try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const user = await User.findById(decoded.userId);
+
+      if (!user) {
+          return res.status(404).json({ message: 'Usuario no encontrado.' });
+      }
+
+      const salt = await bcrypt.genSalt(10);
+      user.password = await bcrypt.hash(password, salt);
+      await user.save();
+
+      res.json({ message: 'Contraseña restablecida correctamente.' });
+  } catch (error) {
+      console.error('Error al restablecer la contraseña:', error);
+      res.status(400).json({ message: 'Enlace inválido o expirado.' });
+  }
+});
+
 router.post('/register', async (req, res) => {
   const { username, email, password } = req.body;
 
@@ -88,7 +127,6 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// Ruta de inicio de sesión
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
@@ -117,7 +155,6 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// Ruta para obtener todos los usuarios (Para propósitos de prueba o administración)
 router.get('/all', async (req, res) => {
   try {
     const users = await User.find({});
