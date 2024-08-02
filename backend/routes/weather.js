@@ -11,7 +11,7 @@ router.get('/weather', async (req, res) => {
   }
 
   try {
-    const response = await axios.get(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}`);
+    const response = await axios.get(`http://api.weatherstack.com/current?access_key=${apiKey}&query=${city}`);
     res.json(response.data);
   } catch (error) {
     console.error(error);

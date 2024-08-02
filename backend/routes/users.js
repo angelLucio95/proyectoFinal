@@ -2,8 +2,10 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
-const { sendConfirmationEmail, sendResetPasswordEmail } = require('../services/mailer');
+const Role = require('../models/role');
+const { sendConfirmationEmail, sendResetPasswordEmail } = require('../services/mailer'); 
 const auth = require('../middleware/auth');
+const checkPermission = require('../middleware/checkPermission');
 const router = express.Router();
 
 const validatePassword = (password) => {
@@ -35,25 +37,7 @@ const validatePassword = (password) => {
   return null;
 };
 
-// Middleware para verificar el rol de Master
-const isMaster = (req, res, next) => {
-  const token = req.header('x-auth-token');
-  if (!token) {
-    return res.status(401).json({ message: 'No token, authorization denied' });
-  }
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    if (decoded.role !== 'Master') {
-      return res.status(403).json({ message: 'Access denied' });
-    }
-    req.user = decoded;
-    next();
-  } catch (err) {
-    res.status(401).json({ message: 'Token is not valid' });
-  }
-};
-
+// Confirmar usuario
 router.get('/confirm/:token', async (req, res) => {
   try {
     const { token } = req.params;
@@ -64,16 +48,18 @@ router.get('/confirm/:token', async (req, res) => {
       return res.status(404).send('Usuario no encontrado');
     }
 
-    user.isActive = true;
+    user.isActive = true; 
     await user.save();
 
     res.redirect('/login');
   } catch (error) {
     console.error(error);
-    res.status(500).send('Error al activar la cuenta');
+    res.status(500).send('Enlace inválido o expirado');
   }
 });
 
+// Registro de usuarios
+// Ruta de registro
 router.post('/register', async (req, res) => {
   const { username, email, password, phone, gender, address } = req.body;
 
@@ -92,14 +78,12 @@ router.post('/register', async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     const isFirstUser = (await User.countDocuments({})) === 0;
-    const role = isFirstUser ? 'Master' : 'Invitado';
-    
-    console.log(`Assigning role: ${role}`); 
+    const role = isFirstUser ? await Role.findOne({ name: 'Master' }) : await Role.findOne({ name: 'Invitado' });
 
-    user = new User({ username, email, password: hashedPassword, role, phone, gender, address });
+    user = new User({ username, email, password: hashedPassword, role: role._id, phone, gender, address });
     await user.save();
 
-    const payload = { userId: user.id, role: user.role };
+    const payload = { userId: user.id, role: role.name };
     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
 
     sendConfirmationEmail(email, token);
@@ -111,11 +95,12 @@ router.post('/register', async (req, res) => {
   }
 });
 
+// Ruta de inicio de sesión
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).populate('role');
     if (!user) {
       return res.status(400).json({ message: 'Credenciales inválidas' });
     }
@@ -129,7 +114,7 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ message: 'Credenciales inválidas' });
     }
 
-    const payload = { userId: user.id, role: user.role };
+    const payload = { userId: user.id, role: user.role.name };
     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
 
     res.json({ token });
@@ -139,6 +124,7 @@ router.post('/login', async (req, res) => {
   }
 });
 
+// Solicitar restablecimiento de contraseña
 router.post('/forgot-password', async (req, res) => {
   const { email } = req.body;
   try {
@@ -157,6 +143,7 @@ router.post('/forgot-password', async (req, res) => {
   }
 });
 
+// Restablecer contraseña
 router.post('/reset-password/:token', async (req, res) => {
   const { token } = req.params;
   const { password } = req.body;
@@ -180,9 +167,10 @@ router.post('/reset-password/:token', async (req, res) => {
   }
 });
 
-router.get('/all', [auth, isMaster], async (req, res) => {
+// Obtener todos los usuarios
+router.get('/all', [auth, checkPermission('readUsers')], async (req, res) => {
   try {
-    const users = await User.find({});
+    const users = await User.find({}).populate('role');
     res.json(users);
   } catch (err) {
     console.error(err);
@@ -190,9 +178,10 @@ router.get('/all', [auth, isMaster], async (req, res) => {
   }
 });
 
-router.get('/:id', [auth, isMaster], async (req, res) => {
+// Obtener un usuario por ID
+router.get('/:id', [auth, checkPermission('readUsers')], async (req, res) => {
   try {
-    const user = await User.findById(req.params.id);
+    const user = await User.findById(req.params.id).populate('role');
     if (!user) {
       return res.status(404).json({ message: 'Usuario no encontrado' });
     }
@@ -203,7 +192,8 @@ router.get('/:id', [auth, isMaster], async (req, res) => {
   }
 });
 
-router.put('/:id', [auth, isMaster], async (req, res) => {
+// Actualizar un usuario
+router.put('/:id', [auth, checkPermission('updateUsers')], async (req, res) => {
   const { username, email, phone, gender, address, isActive } = req.body;
   try {
     const user = await User.findById(req.params.id);
@@ -213,18 +203,19 @@ router.put('/:id', [auth, isMaster], async (req, res) => {
 
     user.username = username || user.username;
 
+    // Si el correo ha cambiado, enviar confirmación de correo
     if (email && email !== user.email) {
       user.email = email;
-      user.isActive = false;
+      user.isActive = false; // Desactivar hasta que el nuevo correo sea confirmado
       const payload = { userId: user.id };
       const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
       sendConfirmationEmail(email, token);
     }
 
-    user.phone = phone || user.phone;
-    user.gender = gender || user.gender;
-    user.address = address || user.address;
-    user.isActive = isActive !== undefined ? isActive : user.isActive;
+    if (phone) user.phone = phone;
+    if (gender) user.gender = gender;
+    if (address) user.address = address;
+    if (typeof isActive !== 'undefined') user.isActive = isActive;
 
     await user.save();
     res.json({ message: 'Usuario actualizado correctamente' });
@@ -234,38 +225,20 @@ router.put('/:id', [auth, isMaster], async (req, res) => {
   }
 });
 
-router.delete('/:id', [auth, isMaster], async (req, res) => {
+// Eliminar un usuario
+router.delete('/:id', [auth, checkPermission('deleteUsers')], async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
 
     if (!user) {
-      return res.status(404).json({ message: 'Usuario no encontrado' });
+      return res.status(404).json({ message: "Usuario no encontrado" });
     }
 
     await user.deleteOne();
-    res.json({ message: 'Usuario eliminado correctamente' });
+    res.json({ message: "Usuario eliminado correctamente" });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: 'Error del servidor' });
-  }
-});
-
-router.put('/:id/role', [auth, isMaster], async (req, res) => {
-  const { role } = req.body;
-  if (!['Master', 'Invitado'].includes(role)) {
-    return res.status(400).json({ message: 'Rol inválido' });
-  }
-  try {
-    const user = await User.findById(req.params.id);
-    if (!user) {
-      return res.status(404).json({ message: 'Usuario no encontrado' });
-    }
-    user.role = role;
-    await user.save();
-    res.json({ message: 'Rol asignado correctamente' });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Error al asignar el rol' });
+    res.status(500).json({ message: "Error del servidor" });
   }
 });
 

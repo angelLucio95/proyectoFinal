@@ -20,12 +20,7 @@ const UserManagement = () => {
 
   const fetchUsers = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const res = await axios.get('http://localhost:5001/api/users/all', {
-        headers: {
-          'x-auth-token': token
-        }
-      });
+      const res = await axios.get('http://localhost:5001/api/users/all');
       setUsers(res.data);
     } catch (err) {
       toast.error('Error al obtener los usuarios');
@@ -38,12 +33,7 @@ const UserManagement = () => {
 
   const handleDelete = async (id) => {
     try {
-      const token = localStorage.getItem('token');
-      await axios.delete(`http://localhost:5001/api/users/${id}`, {
-        headers: {
-          'x-auth-token': token
-        }
-      });
+      await axios.delete(`http://localhost:5001/api/users/${id}`);
       toast.success('Usuario eliminado correctamente');
       fetchUsers();
     } catch (err) {
@@ -54,7 +44,6 @@ const UserManagement = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem('token');
       await axios.put(`http://localhost:5001/api/users/${selectedUser._id}`, {
         username: selectedUser.username,
         email: selectedUser.email,
@@ -62,10 +51,6 @@ const UserManagement = () => {
         gender: selectedUser.gender,
         address: selectedUser.address,
         isActive: selectedUser.isActive
-      }, {
-        headers: {
-          'x-auth-token': token
-        }
       });
       toast.success('Usuario actualizado correctamente');
       setSelectedUser(null);
@@ -139,7 +124,7 @@ const UserManagement = () => {
             />
             Active
           </label>
-          <p>Rol: {selectedUser.role}</p>
+          <p>Rol: {selectedUser.role.name}</p>
           <button type="submit">Actualizar Usuario</button>
         </form>
       )}
@@ -207,7 +192,7 @@ const UserManagement = () => {
               <td>{user.phone}</td>
               <td>{user.gender}</td>
               <td>{user.address}</td>
-              <td>{user.role}</td>
+              <td>{user.role.name}</td>
               <td>{user.isActive ? 'Yes' : 'No'}</td>
               <td>
                 <button onClick={() => handleEdit(user)}>Editar</button>

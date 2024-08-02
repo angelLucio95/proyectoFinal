@@ -13,10 +13,12 @@ app.use(cors());
 
 // Routes
 const userRoutes = require('./routes/users');
-app.use('/api/users', userRoutes);
+const roleRoutes = require('./routes/roles'); // Importar rutas de roles
+const weatherRoutes = require('./routes/weather'); // Importar rutas de clima
 
-const weatherRoutes = require('./routes/weather'); 
-app.use('/api', weatherRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/roles', roleRoutes); // Usar rutas de roles
+app.use('/api/weather', weatherRoutes); // Usar rutas de clima
 
 const PORT = process.env.PORT || 5000;
 
