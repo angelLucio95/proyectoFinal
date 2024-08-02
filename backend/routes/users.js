@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const { sendConfirmationEmail, sendResetPasswordEmail } = require('../services/mailer');
+const auth = require('../middleware/auth');
 const router = express.Router();
 
 const validatePassword = (password) => {
@@ -34,7 +35,25 @@ const validatePassword = (password) => {
   return null;
 };
 
-// Ruta para confirmar el correo electrónico
+// Middleware para verificar el rol de Master
+const isMaster = (req, res, next) => {
+  const token = req.header('x-auth-token');
+  if (!token) {
+    return res.status(401).json({ message: 'No token, authorization denied' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    if (decoded.role !== 'Master') {
+      return res.status(403).json({ message: 'Access denied' });
+    }
+    req.user = decoded;
+    next();
+  } catch (err) {
+    res.status(401).json({ message: 'Token is not valid' });
+  }
+};
+
 router.get('/confirm/:token', async (req, res) => {
   try {
     const { token } = req.params;
@@ -54,7 +73,7 @@ router.get('/confirm/:token', async (req, res) => {
     res.status(500).send('Error al activar la cuenta');
   }
 });
-// Ruta de registro
+
 router.post('/register', async (req, res) => {
   const { username, email, password, phone, gender, address } = req.body;
 
@@ -72,22 +91,15 @@ router.post('/register', async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Determinar el rol del usuario
     const isFirstUser = (await User.countDocuments({})) === 0;
     const role = isFirstUser ? 'Master' : 'Invitado';
+    
+    console.log(`Assigning role: ${role}`); 
 
-    user = new User({
-      username,
-      email,
-      password: hashedPassword,
-      phone,
-      gender,
-      address,
-      role
-    });
+    user = new User({ username, email, password: hashedPassword, role, phone, gender, address });
     await user.save();
 
-    const payload = { userId: user.id };
+    const payload = { userId: user.id, role: user.role };
     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
 
     sendConfirmationEmail(email, token);
@@ -99,7 +111,6 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// Ruta de inicio de sesión
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
@@ -128,7 +139,6 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// Ruta para solicitar el restablecimiento de contraseña
 router.post('/forgot-password', async (req, res) => {
   const { email } = req.body;
   try {
@@ -147,7 +157,6 @@ router.post('/forgot-password', async (req, res) => {
   }
 });
 
-// Ruta para restablecer la contraseña
 router.post('/reset-password/:token', async (req, res) => {
   const { token } = req.params;
   const { password } = req.body;
@@ -171,8 +180,7 @@ router.post('/reset-password/:token', async (req, res) => {
   }
 });
 
-// Ruta para obtener todos los usuarios (Para propósitos de prueba o administración)
-router.get('/all', async (req, res) => {
+router.get('/all', [auth, isMaster], async (req, res) => {
   try {
     const users = await User.find({});
     res.json(users);
@@ -182,8 +190,7 @@ router.get('/all', async (req, res) => {
   }
 });
 
-// Ruta para obtener un usuario por ID
-router.get('/:id', async (req, res) => {
+router.get('/:id', [auth, isMaster], async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user) {
@@ -196,9 +203,8 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Ruta para actualizar un usuario
-router.put('/:id', async (req, res) => {
-  const { username, email, password, phone, gender, address, isActive } = req.body;
+router.put('/:id', [auth, isMaster], async (req, res) => {
+  const { username, email, phone, gender, address, isActive } = req.body;
   try {
     const user = await User.findById(req.params.id);
     if (!user) {
@@ -206,24 +212,19 @@ router.put('/:id', async (req, res) => {
     }
 
     user.username = username || user.username;
-    user.phone = phone || user.phone;
-    user.gender = gender || user.gender;
-    user.address = address || user.address;
-    user.isActive = isActive !== undefined ? isActive : user.isActive;
 
-    // Si el correo ha cambiado, enviar confirmación de correo
     if (email && email !== user.email) {
       user.email = email;
-      user.isActive = false; // Desactivar hasta que el nuevo correo sea confirmado
+      user.isActive = false;
       const payload = { userId: user.id };
       const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
       sendConfirmationEmail(email, token);
     }
 
-    if (password) {
-      const salt = await bcrypt.genSalt(10);
-      user.password = await bcrypt.hash(password, salt);
-    }
+    user.phone = phone || user.phone;
+    user.gender = gender || user.gender;
+    user.address = address || user.address;
+    user.isActive = isActive !== undefined ? isActive : user.isActive;
 
     await user.save();
     res.json({ message: 'Usuario actualizado correctamente' });
@@ -233,25 +234,23 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// Ruta para eliminar un usuario
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', [auth, isMaster], async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
 
     if (!user) {
-      return res.status(404).json({ message: "Usuario no encontrado" });
+      return res.status(404).json({ message: 'Usuario no encontrado' });
     }
 
     await user.deleteOne();
-    res.json({ message: "Usuario eliminado correctamente" });
+    res.json({ message: 'Usuario eliminado correctamente' });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Error del servidor" });
+    res.status(500).json({ message: 'Error del servidor' });
   }
 });
 
-// Ruta para asignar un rol a un usuario
-router.put('/:id/role', async (req, res) => {
+router.put('/:id/role', [auth, isMaster], async (req, res) => {
   const { role } = req.body;
   if (!['Master', 'Invitado'].includes(role)) {
     return res.status(400).json({ message: 'Rol inválido' });

@@ -20,7 +20,12 @@ const UserManagement = () => {
 
   const fetchUsers = async () => {
     try {
-      const res = await axios.get('http://localhost:5001/api/users/all');
+      const token = localStorage.getItem('token');
+      const res = await axios.get('http://localhost:5001/api/users/all', {
+        headers: {
+          'x-auth-token': token
+        }
+      });
       setUsers(res.data);
     } catch (err) {
       toast.error('Error al obtener los usuarios');
@@ -33,7 +38,12 @@ const UserManagement = () => {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:5001/api/users/${id}`);
+      const token = localStorage.getItem('token');
+      await axios.delete(`http://localhost:5001/api/users/${id}`, {
+        headers: {
+          'x-auth-token': token
+        }
+      });
       toast.success('Usuario eliminado correctamente');
       fetchUsers();
     } catch (err) {
@@ -44,6 +54,7 @@ const UserManagement = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const token = localStorage.getItem('token');
       await axios.put(`http://localhost:5001/api/users/${selectedUser._id}`, {
         username: selectedUser.username,
         email: selectedUser.email,
@@ -51,6 +62,10 @@ const UserManagement = () => {
         gender: selectedUser.gender,
         address: selectedUser.address,
         isActive: selectedUser.isActive
+      }, {
+        headers: {
+          'x-auth-token': token
+        }
       });
       toast.success('Usuario actualizado correctamente');
       setSelectedUser(null);

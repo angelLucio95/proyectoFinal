@@ -1,6 +1,6 @@
 import React from 'react';
 import { Route, Routes } from 'react-router-dom';
-import Sidebar from './Sidebar';
+import Sidebar from './sidebar'; // Ensure the file name is Sidebar.js
 import Weather from './Weather';
 import UserManagement from './UserManagement';
 
