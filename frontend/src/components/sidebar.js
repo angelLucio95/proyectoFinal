@@ -10,6 +10,9 @@ const Sidebar = () => {
         <NavLink to="/dashboard/weather" className="nav-link">
           Clima
         </NavLink>
+        <NavLink to="/dashboard/user-management" className="nav-link">
+          Gestión de Usuarios
+        </NavLink>
         {/* Agrega más enlaces aquí para futuros componentes */}
       </Nav>
     </div>

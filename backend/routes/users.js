@@ -2,7 +2,7 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
-const { sendConfirmationEmail, sendResetPasswordEmail } = require('../services/mailer'); 
+const { sendConfirmationEmail, sendResetPasswordEmail } = require('../services/mailer');
 const router = express.Router();
 
 const validatePassword = (password) => {
@@ -34,6 +34,7 @@ const validatePassword = (password) => {
   return null;
 };
 
+// Ruta para confirmar el correo electrónico
 router.get('/confirm/:token', async (req, res) => {
   try {
     const { token } = req.params;
@@ -44,10 +45,10 @@ router.get('/confirm/:token', async (req, res) => {
       return res.status(404).send('Usuario no encontrado');
     }
 
-    user.isActive = true; 
+    user.isActive = true;
     await user.save();
 
-    res.send('Cuenta activada con éxito');
+    res.redirect('/login');
   } catch (error) {
     console.error(error);
     res.status(500).send('Error al activar la cuenta');
@@ -55,7 +56,7 @@ router.get('/confirm/:token', async (req, res) => {
 });
 // Ruta de registro
 router.post('/register', async (req, res) => {
-  const { username, email, password } = req.body;
+  const { username, email, password, phone, gender, address } = req.body;
 
   const passwordValidationError = validatePassword(password);
   if (passwordValidationError) {
@@ -75,13 +76,21 @@ router.post('/register', async (req, res) => {
     const isFirstUser = (await User.countDocuments({})) === 0;
     const role = isFirstUser ? 'Master' : 'Invitado';
 
-    user = new User({ username, email, password: hashedPassword, role });
+    user = new User({
+      username,
+      email,
+      password: hashedPassword,
+      phone,
+      gender,
+      address,
+      role
+    });
     await user.save();
 
     const payload = { userId: user.id };
     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-    sendConfirmationEmail(email, token); 
+    sendConfirmationEmail(email, token);
 
     res.status(201).json({ message: 'Usuario registrado correctamente. Por favor, revise su correo electrónico para activar su cuenta.' });
   } catch (err) {
@@ -109,7 +118,7 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ message: 'Credenciales inválidas' });
     }
 
-    const payload = { userId: user.id };
+    const payload = { userId: user.id, role: user.role };
     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
 
     res.json({ token });
@@ -173,6 +182,58 @@ router.get('/all', async (req, res) => {
   }
 });
 
+// Ruta para obtener un usuario por ID
+router.get('/:id', async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+    res.json(user);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Error al obtener el usuario' });
+  }
+});
+
+// Ruta para actualizar un usuario
+router.put('/:id', async (req, res) => {
+  const { username, email, password, phone, gender, address, isActive } = req.body;
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+
+    user.username = username || user.username;
+    user.phone = phone || user.phone;
+    user.gender = gender || user.gender;
+    user.address = address || user.address;
+    user.isActive = isActive !== undefined ? isActive : user.isActive;
+
+    // Si el correo ha cambiado, enviar confirmación de correo
+    if (email && email !== user.email) {
+      user.email = email;
+      user.isActive = false; // Desactivar hasta que el nuevo correo sea confirmado
+      const payload = { userId: user.id };
+      const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+      sendConfirmationEmail(email, token);
+    }
+
+    if (password) {
+      const salt = await bcrypt.genSalt(10);
+      user.password = await bcrypt.hash(password, salt);
+    }
+
+    await user.save();
+    res.json({ message: 'Usuario actualizado correctamente' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Error al actualizar el usuario' });
+  }
+});
+
+// Ruta para eliminar un usuario
 router.delete('/:id', async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
@@ -186,6 +247,26 @@ router.delete('/:id', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Error del servidor" });
+  }
+});
+
+// Ruta para asignar un rol a un usuario
+router.put('/:id/role', async (req, res) => {
+  const { role } = req.body;
+  if (!['Master', 'Invitado'].includes(role)) {
+    return res.status(400).json({ message: 'Rol inválido' });
+  }
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+    user.role = role;
+    await user.save();
+    res.json({ message: 'Rol asignado correctamente' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Error al asignar el rol' });
   }
 });
 

@@ -15,9 +15,8 @@ app.use(cors());
 const userRoutes = require('./routes/users');
 app.use('/api/users', userRoutes);
 
-const weather = require('./routes/weather'); 
-app.use('/api', weather);
-
+const weatherRoutes = require('./routes/weather'); 
+app.use('/api', weatherRoutes);
 
 const PORT = process.env.PORT || 5000;
 

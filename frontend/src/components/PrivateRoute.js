@@ -1,8 +1,8 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { jwtDecode } from 'jwt-decode'; // Importa jwtDecode correctamente
+import {jwtDecode} from 'jwt-decode';
 
-const PrivateRoute = ({ children }) => {
+const PrivateRoute = ({ children, roles }) => {
   const isAuthenticated = () => {
     const token = localStorage.getItem('token');
     if (token) {
@@ -15,15 +15,36 @@ const PrivateRoute = ({ children }) => {
         }
         return true;
       } catch (error) {
-        console.error('Token decoding failed:', error);
-        localStorage.removeItem('token');
+        console.error('Error decoding token:', error);
         return false;
       }
     }
     return false;
   };
 
-  return isAuthenticated() ? children : <Navigate to="/login" replace />;
+  const hasRole = () => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+        return roles.includes(decoded.role);
+      } catch (error) {
+        console.error('Error decoding token:', error);
+        return false;
+      }
+    }
+    return false;
+  };
+
+  if (!isAuthenticated()) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (!hasRole()) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return children;
 };
 
 export default PrivateRoute;

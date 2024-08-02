@@ -8,12 +8,14 @@ const Register = () => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [phone, setPhone] = useState('');
+  const [gender, setGender] = useState('Other');
+  const [address, setAddress] = useState('');
   const navigate = useNavigate();
 
   const onSubmit = async (e) => {
     e.preventDefault();
-    const newUser = { username, email, password };
-    console.log("Intentando registrar:", { username, email, password });
+    const newUser = { username, email, password, phone, gender, address };
     try {
       const res = await axios.post('http://localhost:5001/api/users/register', newUser);
       toast.success(res.data.message);
@@ -46,6 +48,26 @@ const Register = () => {
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+        />
+        <input
+          type="text"
+          placeholder="Phone"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+        />
+        <select
+          value={gender}
+          onChange={(e) => setGender(e.target.value)}
+        >
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
+          <option value="Other">Other</option>
+        </select>
+        <input
+          type="text"
+          placeholder="Address"
+          value={address}
+          onChange={(e) => setAddress(e.target.value)}
         />
         <button type="submit">Register</button>
       </form>

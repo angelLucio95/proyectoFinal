@@ -8,7 +8,7 @@ import Dashboard from './components/Dashboard';
 import PrivateRoute from './components/PrivateRoute';
 import RestablecerPassword from './components/RestablecerPassword';
 import ResetPassword from './components/ResetPassword';
-import Weather from './components/Weather';
+import UserManagement from './components/UserManagement';
 
 function App() {
   return (
@@ -19,10 +19,10 @@ function App() {
           <Route path="/" element={<Navigate to="/login" />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/dashboard/*" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
           <Route path="/restablecer-password" element={<RestablecerPassword />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
-          <Route path="/weather" element={<PrivateRoute><Weather /></PrivateRoute>} /> {/* Añadir la ruta Weather */}
+          <Route path="/dashboard/*" element={<PrivateRoute roles={['Master', 'Invitado']}><Dashboard /></PrivateRoute>} />
+          <Route path="/users" element={<PrivateRoute roles={['Master']}><UserManagement /></PrivateRoute>} />
           <Route path="*" element={<Navigate to="/login" />} />
         </Routes>
       </div>
