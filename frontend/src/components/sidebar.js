@@ -36,6 +36,9 @@ const Sidebar = () => {
             <NavLink to="/dashboard/role-management" className="nav-link">
               Gestión de roles
             </NavLink>
+            <NavLink to="/dashboard/role-assignment" className="nav-link">
+              Asignación de roles
+            </NavLink>
           </>
         )}
       </Nav>

@@ -37,6 +37,36 @@ const validatePassword = (password) => {
   return null;
 };
 
+
+const validateUserRole = async (roleId) => {
+  const role = await Role.findById(roleId);
+  return role ? true : false;
+};
+
+// Asignar rol a usuario
+router.put('/:id/role', [auth, checkPermission('updateUsers')], async (req, res) => {
+  const { roleId } = req.body;
+
+  if (!validateUserRole(roleId)) {
+    return res.status(400).json({ message: 'Rol inválido' });
+  }
+
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+
+    user.role = roleId;
+    await user.save();
+    res.json({ message: 'Rol asignado correctamente' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Error al asignar el rol' });
+  }
+});
+
+
 // Confirmar usuario
 router.get('/confirm/:token', async (req, res) => {
   try {

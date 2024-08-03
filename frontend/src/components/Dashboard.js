@@ -4,6 +4,7 @@ import Sidebar from './sidebar';
 import Weather from './Weather';
 import UserManagement from './UserManagement';
 import RoleManagement from './RoleManagement';
+import RoleAssignment from './RoleAssignment';
 
 const Dashboard = () => {
   return (
@@ -14,6 +15,7 @@ const Dashboard = () => {
           <Route path="weather" element={<Weather />} />
           <Route path="user-management" element={<UserManagement />} />
           <Route path="role-management" element={<RoleManagement />} />
+          <Route path="role-assignment" element={<RoleAssignment />} />
           {/* Agrega más rutas aquí para futuros componentes */}
         </Routes>
       </div>
