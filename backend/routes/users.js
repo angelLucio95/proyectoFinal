@@ -59,7 +59,6 @@ router.get('/confirm/:token', async (req, res) => {
 });
 
 // Registro de usuarios
-// Ruta de registro
 router.post('/register', async (req, res) => {
   const { username, email, password, phone, gender, address } = req.body;
 
@@ -77,8 +76,27 @@ router.post('/register', async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    const isFirstUser = (await User.countDocuments({})) === 0;
-    const role = isFirstUser ? await Role.findOne({ name: 'Master' }) : await Role.findOne({ name: 'Invitado' });
+    const userCount = await User.countDocuments({});
+    let role;
+
+    if (userCount === 0) {
+      // Crear y asignar el rol Master al primer usuario
+      role = new Role({
+        name: 'Master',
+        permissions: ['readUsers', 'createUsers', 'updateUsers', 'deleteUsers', 'readRoles', 'createRoles', 'updateRoles', 'deleteRoles']
+      });
+      await role.save();
+    } else {
+      // Buscar o crear el rol Invitado
+      role = await Role.findOne({ name: 'Invitado' });
+      if (!role) {
+        role = new Role({
+          name: 'Invitado',
+          permissions: ['readUsers'] // Ajusta los permisos según sea necesario
+        });
+        await role.save();
+      }
+    }
 
     user = new User({ username, email, password: hashedPassword, role: role._id, phone, gender, address });
     await user.save();

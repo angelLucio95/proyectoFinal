@@ -11,15 +11,16 @@ const RoleManagement = () => {
     'readRoles', 'createRoles', 'updateRoles', 'deleteRoles'
   ]);
 
-  console.log(setAvailablePermissions);
-
   useEffect(() => {
     fetchRoles();
   }, []);
 
   const fetchRoles = async () => {
+    const token = localStorage.getItem('token');
     try {
-      const res = await axios.get('http://localhost:5001/api/roles');
+      const res = await axios.get('http://localhost:5001/api/roles', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       setRoles(res.data);
     } catch (err) {
       toast.error('Error al obtener los roles');
@@ -31,8 +32,11 @@ const RoleManagement = () => {
   };
 
   const handleDelete = async (id) => {
+    const token = localStorage.getItem('token');
     try {
-      await axios.delete(`http://localhost:5001/api/roles/${id}`);
+      await axios.delete(`http://localhost:5001/api/roles/${id}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       toast.success('Rol eliminado correctamente');
       fetchRoles();
     } catch (err) {
@@ -42,8 +46,11 @@ const RoleManagement = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const token = localStorage.getItem('token');
     try {
-      await axios.put(`http://localhost:5001/api/roles/${selectedRole._id}`, selectedRole);
+      await axios.put(`http://localhost:5001/api/roles/${selectedRole._id}`, selectedRole, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       toast.success('Rol actualizado correctamente');
       setSelectedRole(null);
       fetchRoles();
@@ -54,8 +61,11 @@ const RoleManagement = () => {
 
   const handleNewRoleSubmit = async (e) => {
     e.preventDefault();
+    const token = localStorage.getItem('token');
     try {
-      await axios.post('http://localhost:5001/api/roles', newRole);
+      await axios.post('http://localhost:5001/api/roles', newRole, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       toast.success('Rol registrado correctamente');
       setNewRole({ name: '', permissions: [] });
       fetchRoles();

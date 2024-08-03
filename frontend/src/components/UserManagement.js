@@ -19,8 +19,11 @@ const UserManagement = () => {
   }, []);
 
   const fetchUsers = async () => {
+    const token = localStorage.getItem('token');
     try {
-      const res = await axios.get('http://localhost:5001/api/users/all');
+      const res = await axios.get('http://localhost:5001/api/users/all', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       setUsers(res.data);
     } catch (err) {
       toast.error('Error al obtener los usuarios');
@@ -32,8 +35,11 @@ const UserManagement = () => {
   };
 
   const handleDelete = async (id) => {
+    const token = localStorage.getItem('token');
     try {
-      await axios.delete(`http://localhost:5001/api/users/${id}`);
+      await axios.delete(`http://localhost:5001/api/users/${id}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       toast.success('Usuario eliminado correctamente');
       fetchUsers();
     } catch (err) {
@@ -43,6 +49,7 @@ const UserManagement = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const token = localStorage.getItem('token');
     try {
       await axios.put(`http://localhost:5001/api/users/${selectedUser._id}`, {
         username: selectedUser.username,
@@ -51,6 +58,8 @@ const UserManagement = () => {
         gender: selectedUser.gender,
         address: selectedUser.address,
         isActive: selectedUser.isActive
+      }, {
+        headers: { 'Authorization': `Bearer ${token}` }
       });
       toast.success('Usuario actualizado correctamente');
       setSelectedUser(null);
@@ -62,8 +71,11 @@ const UserManagement = () => {
 
   const handleNewUserSubmit = async (e) => {
     e.preventDefault();
+    const token = localStorage.getItem('token');
     try {
-      await axios.post('http://localhost:5001/api/users/register', newUser);
+      await axios.post('http://localhost:5001/api/users/register', newUser, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       toast.success('Usuario registrado correctamente');
       setNewUser({
         username: '',
