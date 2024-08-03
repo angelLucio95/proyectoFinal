@@ -1,5 +1,6 @@
 const express = require('express');
 const Role = require('../models/role');
+const User = require('../models/User'); 
 const auth = require('../middleware/auth');
 const checkPermission = require('../middleware/checkPermission');
 const router = express.Router();
@@ -68,6 +69,11 @@ router.delete('/:id', [auth, checkPermission('deleteRoles')], async (req, res) =
     const role = await Role.findById(req.params.id);
     if (!role) {
       return res.status(404).json({ message: 'Rol no encontrado' });
+    }
+
+    const usersWithRole = await User.find({ role: role._id });
+    if (usersWithRole.length > 0) {
+      return res.status(400).json({ message: 'No se puede eliminar el rol porque está asignado a uno o más usuarios' });
     }
 
     await role.deleteOne();

@@ -40,7 +40,7 @@ const RoleManagement = () => {
       toast.success('Rol eliminado correctamente');
       fetchRoles();
     } catch (err) {
-      toast.error('Error al eliminar el rol');
+      toast.error(err.response?.data?.message || 'Error al eliminar el rol');
     }
   };
 
