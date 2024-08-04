@@ -1,9 +1,9 @@
-// backend/routes/houses.js
 const express = require('express');
 const axios = require('axios');
 const House = require('../models/House');
 const auth = require('../middleware/auth');
 const checkPermission = require('../middleware/checkPermission');
+const { sendVisitEmail } = require('../services/mailer');
 const router = express.Router();
 
 // Obtener una imagen de una casa desde Unsplash
@@ -102,7 +102,6 @@ router.delete('/:id', [auth, checkPermission('deleteHouses')], async (req, res) 
 // Agendar visita
 router.post('/:id/schedule-visit', auth, async (req, res) => {
   const { id } = req.params;
-  const userEmail = req.user.email;
 
   try {
     const house = await House.findById(id);
@@ -117,9 +116,9 @@ router.post('/:id/schedule-visit', auth, async (req, res) => {
     visitDate.setMinutes(0, 0, 0); // Minutos en 0
 
     // Enviar el correo de visita
-    await sendVisitEmail(userEmail, house, visitDate);
+    await sendVisitEmail(req.user.email, house, visitDate);
 
-    res.json({ message: 'Visita agendada correctamente', visitDate });
+    res.json({ message: `Visita agendada correctamente para el ${visitDate}`, visitDate });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Error al agendar la visita' });

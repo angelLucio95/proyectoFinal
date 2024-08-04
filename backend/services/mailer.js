@@ -57,7 +57,7 @@ const sendVisitEmail = async (email, house, date) => {
       from: process.env.EMAIL_USERNAME,
       to: email,
       subject: 'Visita agendada',
-      text: `Has agendado una visita a la casa "${house.title}" en la ubicación ${house.location} para la fecha ${date}.`
+      text: `Has agendado una visita a la casa "${house.title}" en la ubicación ${house.location} para la fecha ${date}.`,
     };
   
     try {
@@ -67,6 +67,9 @@ const sendVisitEmail = async (email, house, date) => {
       console.error('Error al enviar el correo de visita:', error);
     }
   };
+  
+
+
 
 module.exports = {
     sendConfirmationEmail,
