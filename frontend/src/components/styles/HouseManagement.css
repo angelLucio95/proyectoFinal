@@ -1,0 +1,22 @@
+
+.house-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .house-table th, .house-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+  
+  .house-table th {
+    background-color: #f2f2f2;
+    color: black;
+  }
+  
+  .house-table td img.house-image {
+    width: 150px;
+    height: auto;
+  }
+  

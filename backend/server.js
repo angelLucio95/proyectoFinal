@@ -15,10 +15,12 @@ app.use(cors());
 const userRoutes = require('./routes/users');
 const roleRoutes = require('./routes/roles'); 
 const weatherRoutes = require('./routes/weather'); 
+const houseRoutes = require('./routes/houses');
 
 app.use('/api/users', userRoutes);
 app.use('/api/roles', roleRoutes); 
 app.use('/api/weather', weatherRoutes); 
+app.use('/api/houses', houseRoutes);
 
 const PORT = process.env.PORT || 5000;
 
