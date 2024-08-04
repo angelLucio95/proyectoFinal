@@ -37,10 +37,19 @@ const validatePassword = (password) => {
   return null;
 };
 
-
 const validateUserRole = async (roleId) => {
   const role = await Role.findById(roleId);
   return role ? true : false;
+};
+
+const createToken = (user) => {
+  const payload = {
+    userId: user._id,
+    username: user.username,
+    role: user.role.name,
+    permissions: user.role.permissions
+  };
+  return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
 };
 
 // Asignar rol a usuario
@@ -65,7 +74,6 @@ router.put('/:id/role', [auth, checkPermission('updateUsers')], async (req, res)
     res.status(500).json({ message: 'Error al asignar el rol' });
   }
 });
-
 
 // Confirmar usuario
 router.get('/confirm/:token', async (req, res) => {
@@ -113,7 +121,7 @@ router.post('/register', async (req, res) => {
       // Crear y asignar el rol Master al primer usuario
       role = new Role({
         name: 'Master',
-        permissions: ['readUsers', 'createUsers', 'updateUsers', 'deleteUsers', 'readRoles', 'createRoles', 'updateRoles', 'deleteRoles']
+        permissions: ['readUsers', 'createUsers', 'updateUsers', 'deleteUsers', 'readRoles', 'createRoles', 'updateRoles', 'deleteRoles', 'readHouses', 'createHouses', 'updateHouses', 'deleteHouses']
       });
       await role.save();
     } else {
@@ -122,7 +130,7 @@ router.post('/register', async (req, res) => {
       if (!role) {
         role = new Role({
           name: 'Invitado',
-          permissions: ['readUsers'] // Ajusta los permisos según sea necesario
+          permissions: ['readHouses'] // Ajusta los permisos según sea necesario
         });
         await role.save();
       }
@@ -131,8 +139,7 @@ router.post('/register', async (req, res) => {
     user = new User({ username, email, password: hashedPassword, role: role._id, phone, gender, address });
     await user.save();
 
-    const payload = { userId: user.id, role: role.name };
-    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = createToken(user);
 
     sendConfirmationEmail(email, token);
 
@@ -162,8 +169,7 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ message: 'Credenciales inválidas' });
     }
 
-    const payload = { userId: user.id, role: user.role.name };
-    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = createToken(user);
 
     res.json({ token });
   } catch (err) {

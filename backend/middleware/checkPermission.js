@@ -1,5 +1,5 @@
 const User = require('../models/User');
-const Role = require('../models/role');
+const Role = require('../models/Role');
 
 function checkPermission(permission) {
   return async (req, res, next) => {

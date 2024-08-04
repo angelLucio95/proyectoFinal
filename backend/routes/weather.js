@@ -1,45 +1,42 @@
-// routes/weather.js
+// backend/routes/weather.js
 const express = require('express');
 const axios = require('axios');
 const router = express.Router();
-const cities = require('./cities'); // Importar las ciudades
+const cities = require('./cities'); // Asegúrate de tener este archivo en la carpeta data
 
+// Ruta para obtener el clima por ciudad
 router.get('/', async (req, res) => {
   const { city } = req.query;
-  const apiKey = process.env.OPENWEATHER_API_KEY;
+  const apiKey = process.env.WEATHER_API_KEY;
 
-  const getWeatherData = async (city) => {
-    try {
-      const response = await axios.get(`http://api.weatherstack.com/current`, {
-        params: {
-          access_key: apiKey,
-          query: city
-        }
-      });
-      return response.data;
-    } catch (error) {
-      console.error(`Error fetching weather for ${city}:`, error);
-      return null;
-    }
-  };
-
-  if (city) {
-    const weatherData = await getWeatherData(city);
-    return res.json([weatherData]);
-  }
-
+  // Seleccionar 5 ciudades aleatorias
   const randomCities = [];
   while (randomCities.length < 5) {
-    const randomCity = cities[Math.floor(Math.random() * cities.length)];
-    if (!randomCities.includes(randomCity)) {
-      randomCities.push(randomCity);
+    const randomIndex = Math.floor(Math.random() * cities.length);
+    if (!randomCities.includes(cities[randomIndex]) && cities[randomIndex] !== city) {
+      randomCities.push(cities[randomIndex]);
     }
   }
 
-  const weatherPromises = randomCities.map(getWeatherData);
-  const weatherData = await Promise.all(weatherPromises);
+  // Añadir la ciudad buscada al principio
+  randomCities.unshift(city);
 
-  res.json(weatherData.filter(data => data !== null));
+  try {
+    const weatherData = await Promise.all(randomCities.map(async (city) => {
+      const response = await axios.get(`https://api.weatherapi.com/v1/current.json`, {
+        params: { key: apiKey, q: city, aqi: 'no' }
+      });
+      return {
+        city,
+        data: response.data
+      };
+    }));
+
+    res.json(weatherData);
+  } catch (error) {
+    console.error('Error al obtener los datos del clima:', error.response ? error.response.data : error.message);
+    res.status(500).json({ message: 'Error al obtener los datos del clima' });
+  }
 });
 
 module.exports = router;

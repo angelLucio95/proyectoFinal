@@ -7,9 +7,9 @@ const RoleManagement = () => {
   const [selectedRole, setSelectedRole] = useState(null);
   const [newRole, setNewRole] = useState({ name: '', permissions: [] });
   const [availablePermissions, setAvailablePermissions] = useState([
-    'readUsers', 'createUsers', 'updateUsers', 'deleteUsers',
+    'readUsers', 'createUsers', 'updateUsers', 'deleteUsers', 
     'readRoles', 'createRoles', 'updateRoles', 'deleteRoles',
-    'readHouses', 'createHouses', 'updateHouses', 'deleteHouses',
+    'readHouses', 'createHouses', 'updateHouses', 'deleteHouses'
   ]);
 
   useEffect(() => {
