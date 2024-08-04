@@ -1,0 +1,85 @@
+/* frontend/src/components/styles/Register.css */
+
+.register-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f0f2f5;
+  }
+  
+  .register-card {
+    display: flex;
+    width: 80%;
+    max-width: 900px;
+    background-color: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  
+  .register-carousel {
+    flex: 1;
+    background: url('https://source.unsplash.com/random/800x600') no-repeat center center/cover;
+  }
+  
+  .register-form {
+    flex: 1;
+    padding: 40px;
+  }
+  
+  .register-form h2 {
+    margin-bottom: 20px;
+  }
+  
+  .register-form .input-group {
+    margin-bottom: 15px;
+    position: relative;
+  }
+  
+  .register-form .input-group input {
+    width: calc(100% - 40px);
+    padding: 10px 20px 10px 40px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+  }
+  
+  .register-form .input-group .icon {
+    position: absolute;
+    top: 50%;
+    left: 10px;
+    transform: translateY(-50%);
+    font-size: 18px;
+    color: #007bff;
+  }
+  
+  .register-form button {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .register-form button:hover {
+    background-color: #0056b3;
+  }
+  
+  .register-form .links {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  
+  .register-form .links a {
+    color: #007bff;
+    text-decoration: none;
+  }
+  
+  .register-form .links a:hover {
+    text-decoration: underline;
+  }
+  

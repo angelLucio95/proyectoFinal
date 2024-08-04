@@ -8,6 +8,8 @@ import Dashboard from './components/Dashboard';
 import PrivateRoute from './components/PrivateRoute';
 import RestablecerPassword from './components/RestablecerPassword';
 import ResetPassword from './components/ResetPassword';
+import 'bootstrap/dist/css/bootstrap.min.css';
+
 
 function App() {
   return (

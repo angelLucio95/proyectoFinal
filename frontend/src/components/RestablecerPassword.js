@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { FaEnvelope } from 'react-icons/fa';
+import './styles/RestablecerPassword.css';
 
 const RestablecerPassword = () => {
   const [email, setEmail] = useState('');
@@ -19,18 +21,24 @@ const RestablecerPassword = () => {
   };
 
   return (
-    <div>
-      <h1>Recuperar Contraseña</h1>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <button type="submit">Enviar Correo</button>
-      </form>
-      {message && <p>{message}</p>}
+    <div className="reset-password-container">
+      <div className="reset-password-card">
+        <h2>Recuperar Contraseña</h2>
+        <form onSubmit={handleSubmit}>
+          <div className="input-group">
+            <FaEnvelope className="icon" />
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          <button type="submit">Enviar Correo</button>
+        </form>
+        {message && <p>{message}</p>}
+      </div>
     </div>
   );
 };
