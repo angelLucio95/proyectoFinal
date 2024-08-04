@@ -1,0 +1,121 @@
+/* UserManagement.css */
+.user-management-container {
+    transition: margin-left 0.3s;
+  }
+  
+  .user-management-container.sidebar-open {
+    margin-left: 250px;
+  }
+  
+  .user-management-container.sidebar-closed {
+    margin-left: 0;
+  }
+  
+  .add-user-btn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    margin-bottom: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  
+  .add-user-btn:hover {
+    background-color: #0056b3;
+  }
+  
+  .user-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+  }
+  
+  .user-table th, .user-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+  
+  .user-table th {
+    background-color: #f2f2f2;
+  }
+  
+  .status-chip {
+    padding: 5px 10px;
+    border-radius: 15px;
+    color: white;
+    font-weight: bold;
+  }
+  
+  .status-chip.active {
+    background-color: green;
+  }
+  
+  .status-chip.inactive {
+    background-color: red;
+  }
+  
+  .edit-btn, .delete-btn {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    margin-right: 10px;
+  }
+  
+  .edit-btn:hover {
+    color: #007bff;
+  }
+  
+  .delete-btn:hover {
+    color: #dc3545;
+  }
+  
+  .user-form {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 300px;
+    height: 100%;
+    background-color: #fff;
+    box-shadow: -2px 0 5px rgba(0,0,0,0.5);
+    padding: 20px;
+    overflow-y: auto;
+  }
+  
+  .user-form h2 {
+    margin-top: 0;
+  }
+  
+  .user-form label {
+    display: block;
+    margin: 10px 0 5px;
+  }
+  
+  .user-form input, .user-form select {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+  
+  .user-form button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px;
+    margin-right: 10px;
+    cursor: pointer;
+  }
+  
+  .user-form button[type="button"] {
+    background-color: #6c757d;
+  }
+  
+  .user-form button:hover {
+    opacity: 0.9;
+  }
+  

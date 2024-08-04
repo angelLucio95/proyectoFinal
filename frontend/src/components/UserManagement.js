@@ -1,28 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { FaUserPlus, FaEdit, FaTrash } from 'react-icons/fa';
+import './styles/UserManagement.css';
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
-  const [newUser, setNewUser] = useState({
+  const [showForm, setShowForm] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true); // Estado para el sidebar
+  const [formData, setFormData] = useState({
     username: '',
     email: '',
-    password: '',
     phone: '',
-    gender: 'Other',
-    address: ''
+    gender: '',
+    address: '',
+    isActive: '',
+    role: '',
   });
 
   useEffect(() => {
     fetchUsers();
+    handleSidebarToggle(); // Escuchar el estado del sidebar
   }, []);
 
   const fetchUsers = async () => {
     const token = localStorage.getItem('token');
     try {
       const res = await axios.get('http://localhost:5001/api/users/all', {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
       setUsers(res.data);
     } catch (err) {
@@ -30,15 +36,34 @@ const UserManagement = () => {
     }
   };
 
+  const handleSidebarToggle = () => {
+    const sidebarToggle = document.getElementById('sidebar-toggle');
+    if (sidebarToggle) {
+      sidebarToggle.addEventListener('click', () => {
+        setIsSidebarOpen(!isSidebarOpen);
+      });
+    }
+  };
+
   const handleEdit = (user) => {
     setSelectedUser(user);
+    setFormData({
+      username: user.username,
+      email: user.email,
+      phone: user.phone,
+      gender: user.gender,
+      address: user.address,
+      isActive: user.isActive,
+      role: user.role.name,
+    });
+    setShowForm(true);
   };
 
   const handleDelete = async (id) => {
     const token = localStorage.getItem('token');
     try {
       await axios.delete(`http://localhost:5001/api/users/${id}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
       toast.success('Usuario eliminado correctamente');
       fetchUsers();
@@ -50,150 +75,73 @@ const UserManagement = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem('token');
+    const url = selectedUser
+      ? `http://localhost:5001/api/users/${selectedUser._id}`
+      : 'http://localhost:5001/api/users/register';
+    const method = selectedUser ? 'put' : 'post';
+
     try {
-      await axios.put(`http://localhost:5001/api/users/${selectedUser._id}`, {
-        username: selectedUser.username,
-        email: selectedUser.email,
-        phone: selectedUser.phone,
-        gender: selectedUser.gender,
-        address: selectedUser.address,
-        isActive: selectedUser.isActive
-      }, {
-        headers: { 'Authorization': `Bearer ${token}` }
+      await axios[method](url, formData, {
+        headers: { Authorization: `Bearer ${token}` },
       });
-      toast.success('Usuario actualizado correctamente');
+      toast.success(`Usuario ${selectedUser ? 'actualizado' : 'registrado'} correctamente`);
+      setShowForm(false);
+      setFormData({
+        username: '',
+        email: '',
+        phone: '',
+        gender: '',
+        address: '',
+        isActive: '',
+        role: '',
+      });
       setSelectedUser(null);
       fetchUsers();
     } catch (err) {
-      toast.error('Error al actualizar el usuario');
+      toast.error(`Error al ${selectedUser ? 'actualizar' : 'registrar'} el usuario`);
     }
   };
 
-  const handleNewUserSubmit = async (e) => {
-    e.preventDefault();
-    const token = localStorage.getItem('token');
-    try {
-      await axios.post('http://localhost:5001/api/users/register', newUser, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      toast.success('Usuario registrado correctamente');
-      setNewUser({
-        username: '',
-        email: '',
-        password: '',
-        phone: '',
-        gender: 'Other',
-        address: ''
-      });
-      fetchUsers();
-    } catch (err) {
-      toast.error('Error al registrar el usuario');
-    }
+  const handleAddUser = () => {
+    setSelectedUser(null);
+    setFormData({
+      username: '',
+      email: '',
+      phone: '',
+      gender: '',
+      address: '',
+      isActive: '',
+      role: '',
+    });
+    setShowForm(true);
+  };
+
+  const handleCloseForm = () => {
+    setShowForm(false);
+    setSelectedUser(null);
+  };
+
+  const handleInputChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   return (
-    <div>
+    <div className={`user-management-container ${isSidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
       <h1>Gestión de Usuarios</h1>
-      {selectedUser && (
-        <form onSubmit={handleSubmit}>
-          <input
-            type="text"
-            placeholder="Username"
-            value={selectedUser.username}
-            onChange={(e) => setSelectedUser({ ...selectedUser, username: e.target.value })}
-          />
-          <input
-            type="email"
-            placeholder="Email"
-            value={selectedUser.email}
-            onChange={(e) => setSelectedUser({ ...selectedUser, email: e.target.value })}
-          />
-          <input
-            type="text"
-            placeholder="Phone"
-            value={selectedUser.phone}
-            onChange={(e) => setSelectedUser({ ...selectedUser, phone: e.target.value })}
-          />
-          <select
-            value={selectedUser.gender}
-            onChange={(e) => setSelectedUser({ ...selectedUser, gender: e.target.value })}
-          >
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-            <option value="Other">Other</option>
-          </select>
-          <input
-            type="text"
-            placeholder="Address"
-            value={selectedUser.address}
-            onChange={(e) => setSelectedUser({ ...selectedUser, address: e.target.value })}
-          />
-          <label>
-            <input
-              type="checkbox"
-              checked={selectedUser.isActive}
-              onChange={(e) => setSelectedUser({ ...selectedUser, isActive: e.target.checked })}
-            />
-            Active
-          </label>
-          <p>Rol: {selectedUser.role.name}</p>
-          <button type="submit">Actualizar Usuario</button>
-        </form>
-      )}
-      <h2>Registrar Nuevo Usuario</h2>
-      <form onSubmit={handleNewUserSubmit}>
-        <input
-          type="text"
-          placeholder="Username"
-          value={newUser.username}
-          onChange={(e) => setNewUser({ ...newUser, username: e.target.value })}
-        />
-        <input
-          type="email"
-          placeholder="Email"
-          value={newUser.email}
-          onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={newUser.password}
-          onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
-        />
-        <input
-          type="text"
-          placeholder="Phone"
-          value={newUser.phone}
-          onChange={(e) => setNewUser({ ...newUser, phone: e.target.value })}
-        />
-        <select
-          value={newUser.gender}
-          onChange={(e) => setNewUser({ ...newUser, gender: e.target.value })}
-        >
-          <option value="Male">Male</option>
-          <option value="Female">Female</option>
-          <option value="Other">Other</option>
-        </select>
-        <input
-          type="text"
-          placeholder="Address"
-          value={newUser.address}
-          onChange={(e) => setNewUser({ ...newUser, address: e.target.value })}
-        />
-        <button type="submit">Registrar Usuario</button>
-      </form>
-      <h2>Lista de Usuarios</h2>
-      <table>
+      <button className="add-user-btn" onClick={handleAddUser}>
+        <FaUserPlus /> Agregar Usuario
+      </button>
+      <table className="user-table">
         <thead>
           <tr>
-            <th>Username</th>
+            <th>Nombre de Usuario</th>
             <th>Email</th>
-            <th>Phone</th>
-            <th>Gender</th>
-            <th>Address</th>
-            <th>Role</th>
-            <th>Active</th>
-            <th>Actions</th>
+            <th>Teléfono</th>
+            <th>Género</th>
+            <th>Dirección</th>
+            <th>Estado</th>
+            <th>Rol</th>
+            <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -204,16 +152,97 @@ const UserManagement = () => {
               <td>{user.phone}</td>
               <td>{user.gender}</td>
               <td>{user.address}</td>
-              <td>{user.role.name}</td>
-              <td>{user.isActive ? 'Yes' : 'No'}</td>
               <td>
-                <button onClick={() => handleEdit(user)}>Editar</button>
-                <button onClick={() => handleDelete(user._id)}>Eliminar</button>
+                <span className={`status-chip ${user.isActive ? 'active' : 'inactive'}`}>
+                  {user.isActive ? 'Activo' : 'Inactivo'}
+                </span>
+              </td>
+              <td>{user.role.name}</td>
+              <td>
+                <button className="edit-btn" onClick={() => handleEdit(user)}>
+                  <FaEdit />
+                </button>
+                <button className="delete-btn" onClick={() => handleDelete(user._id)}>
+                  <FaTrash />
+                </button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+      {showForm && (
+        <div className="user-form">
+          <h2>{selectedUser ? 'Editar Usuario' : 'Agregar Usuario'}</h2>
+          <form onSubmit={handleSubmit}>
+            <label>Nombre de Usuario</label>
+            <input
+              type="text"
+              name="username"
+              value={formData.username}
+              onChange={handleInputChange}
+              required
+            />
+            <label>Email</label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleInputChange}
+              required
+            />
+            <label>Teléfono</label>
+            <input
+              type="text"
+              name="phone"
+              value={formData.phone}
+              onChange={handleInputChange}
+              required
+            />
+            <label>Género</label>
+            <select name="gender" value={formData.gender} onChange={handleInputChange} required>
+              <option value="">Seleccione</option>
+              <option value="Male">Masculino</option>
+              <option value="Female">Femenino</option>
+              <option value="Other">Otro</option>
+            </select>
+            <label>Dirección</label>
+            <input
+              type="text"
+              name="address"
+              value={formData.address}
+              onChange={handleInputChange}
+              required
+            />
+            {!selectedUser && (
+              <>
+                <label>Contraseña</label>
+                <input
+                  type="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  required
+                />
+              </>
+            )}
+            {selectedUser && (
+              <>
+                <label>Estado</label>
+                <input
+                  type="text"
+                  name="isActive"
+                  value={formData.isActive ? 'Activo' : 'Inactivo'}
+                  disabled
+                />
+              </>
+            )}
+            <button type="submit">{selectedUser ? 'Actualizar' : 'Registrar'}</button>
+            <button type="button" onClick={handleCloseForm}>
+              Cancelar
+            </button>
+          </form>
+        </div>
+      )}
     </div>
   );
 };
