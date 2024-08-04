@@ -19,8 +19,7 @@ const Dashboard = () => {
           <Route path="role-management" element={<RoleManagement />} />
           <Route path="role-assignment" element={<RoleAssignment />} />
           <Route path="house-management" element={<HouseManagement />} />
-          <Route path="house-catalog" element={<HouseCatalog />} /> {/* Agrega la nueva ruta */}
-          {/* Agrega más rutas aquí para futuros componentes */}
+          <Route path="house-catalog" element={<HouseCatalog />} />
         </Routes>
       </div>
     </div>

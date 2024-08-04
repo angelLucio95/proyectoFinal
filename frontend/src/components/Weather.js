@@ -26,7 +26,7 @@ const Weather = () => {
       const response = await axios.get('http://localhost:5001/api/weather', {
         params: { city },
       });
-      setWeatherData(prevData => [...prevData, response.data[0]]);
+      setWeatherData(prevData => [response.data[0], ...prevData.slice(0, 4)]);
       toast.success('Datos meteorológicos obtenidos correctamente');
     } catch (error) {
       toast.error('Error al obtener los datos meteorológicos');
@@ -39,9 +39,9 @@ const Weather = () => {
   };
 
   return (
-    <div>
+    <div className="weather-container">
       <h1>Consulta del Clima</h1>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="weather-form">
         <input
           type="text"
           placeholder="Ingresa el nombre de la ciudad"

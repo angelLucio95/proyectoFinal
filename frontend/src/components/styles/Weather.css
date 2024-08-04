@@ -1,4 +1,41 @@
-/* Weather.css */
+/* frontend/src/components/styles/Weather.css */
+
+.weather-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  min-height: 100vh;
+  background-size: cover;
+}
+
+.weather-form {
+  margin-bottom: 20px;
+}
+
+.weather-form input {
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  margin-right: 10px;
+}
+
+.weather-form button {
+  padding: 10px 20px;
+  font-size: 16px;
+  border: none;
+  background-color: #007bff;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.weather-form button:hover {
+  background-color: #0056b3;
+}
+
 .weather-cards {
   display: flex;
   flex-wrap: wrap;
@@ -7,15 +44,23 @@
 }
 
 .weather-card {
-  background: #fff;
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 20px;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  padding: 20px;
   text-align: center;
   width: 200px;
 }
 
+.weather-card h2 {
+  margin-bottom: 10px;
+}
+
 .weather-card img {
-  width: 50px;
-  height: 50px;
+  width: 50%;
+  height: auto;
+}
+
+.weather-card p {
+  margin: 5px 0;
 }
