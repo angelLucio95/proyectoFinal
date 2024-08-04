@@ -1,18 +1,26 @@
-// frontend/src/components/HouseManagement.js
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { Modal, Button, Form } from 'react-bootstrap';
 import './styles/HouseManagement.css';
 
 const HouseManagement = () => {
   const [houses, setHouses] = useState([]);
-  const [selectedHouse, setSelectedHouse] = useState(null);
+  const [show, setShow] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [currentHouse, setCurrentHouse] = useState({
+    title: '',
+    description: '',
+    price: '',
+    location: '',
+    status: 'Libre'
+  });
   const [newHouse, setNewHouse] = useState({
     title: '',
     description: '',
     price: '',
     location: '',
-    status: 'Libre',
+    status: 'Libre'
   });
 
   useEffect(() => {
@@ -31,28 +39,76 @@ const HouseManagement = () => {
     }
   };
 
-  const fetchImageUrl = async (query) => {
-    try {
-      const res = await axios.get('https://api.unsplash.com/search/photos', {
-        params: { query, per_page: 1 },
-        headers: { Authorization: `Client-ID ${process.env.REACT_APP_UNSPLASH_API_KEY}` },
-      });
-      const imageUrl = res.data.results[0]?.urls?.regular || '';
-      return imageUrl;
-    } catch (err) {
-      toast.error('Error al obtener la imagen de Unsplash');
-      return '';
+  const handleShow = () => {
+    setEditMode(false);
+    setShow(true);
+  };
+
+  const handleClose = () => {
+    setShow(false);
+    setCurrentHouse({
+      title: '',
+      description: '',
+      price: '',
+      location: '',
+      status: 'Libre'
+    });
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    if (editMode) {
+      setCurrentHouse({ ...currentHouse, [name]: value });
+    } else {
+      setNewHouse({ ...newHouse, [name]: value });
     }
   };
 
-  const handleEdit = (house) => {
-    setSelectedHouse(house);
-  };
-
-  const handleDelete = async (id) => {
+  const handleAddHouse = async () => {
     const token = localStorage.getItem('token');
     try {
-      await axios.delete(`http://localhost:5001/api/houses/${id}`, {
+      await axios.post('http://localhost:5001/api/houses', newHouse, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      toast.success('Casa agregada correctamente');
+      setNewHouse({
+        title: '',
+        description: '',
+        price: '',
+        location: '',
+        status: 'Libre'
+      });
+      handleClose();
+      fetchHouses();
+    } catch (err) {
+      toast.error('Error al agregar la casa');
+    }
+  };
+
+  const handleEditHouse = (house) => {
+    setCurrentHouse(house);
+    setEditMode(true);
+    setShow(true);
+  };
+
+  const handleUpdateHouse = async () => {
+    const token = localStorage.getItem('token');
+    try {
+      await axios.put(`http://localhost:5001/api/houses/${currentHouse._id}`, currentHouse, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      toast.success('Casa actualizada correctamente');
+      handleClose();
+      fetchHouses();
+    } catch (err) {
+      toast.error('Error al actualizar la casa');
+    }
+  };
+
+  const handleDeleteHouse = async (houseId) => {
+    const token = localStorage.getItem('token');
+    try {
+      await axios.delete(`http://localhost:5001/api/houses/${houseId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       toast.success('Casa eliminada correctamente');
@@ -62,160 +118,125 @@ const HouseManagement = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const token = localStorage.getItem('token');
-    const imageUrl = await fetchImageUrl(selectedHouse.location);
-    try {
-      await axios.put(
-        `http://localhost:5001/api/houses/${selectedHouse._id}`,
-        { ...selectedHouse, imageUrl },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      toast.success('Casa actualizada correctamente');
-      setSelectedHouse(null);
-      fetchHouses();
-    } catch (err) {
-      toast.error('Error al actualizar la casa');
-    }
-  };
-
-  const handleNewHouseSubmit = async (e) => {
-    e.preventDefault();
-    const token = localStorage.getItem('token');
-    const imageUrl = await fetchImageUrl(newHouse.location);
-    try {
-      await axios.post(
-        'http://localhost:5001/api/houses',
-        { ...newHouse, imageUrl },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      toast.success('Casa registrada correctamente');
-      setNewHouse({
-        title: '',
-        description: '',
-        price: '',
-        location: '',
-        status: 'Libre',
-      });
-      fetchHouses();
-    } catch (err) {
-      toast.error('Error al registrar la casa');
-    }
-  };
-
   return (
     <div className="house-management-container">
       <h1>Gestión de Casas</h1>
-      {selectedHouse && (
-        <form onSubmit={handleSubmit}>
-          <input
-            type="text"
-            placeholder="Título"
-            value={selectedHouse.title}
-            onChange={(e) => setSelectedHouse({ ...selectedHouse, title: e.target.value })}
-          />
-          <input
-            type="text"
-            placeholder="Descripción"
-            value={selectedHouse.description}
-            onChange={(e) => setSelectedHouse({ ...selectedHouse, description: e.target.value })}
-          />
-          <input
-            type="number"
-            placeholder="Precio"
-            value={selectedHouse.price}
-            onChange={(e) => setSelectedHouse({ ...selectedHouse, price: e.target.value })}
-          />
-          <input
-            type="text"
-            placeholder="Ubicación"
-            value={selectedHouse.location}
-            onChange={(e) => setSelectedHouse({ ...selectedHouse, location: e.target.value })}
-          />
-          <select
-            value={selectedHouse.status}
-            onChange={(e) => setSelectedHouse({ ...selectedHouse, status: e.target.value })}
-          >
-            <option value="Libre">Libre</option>
-            <option value="Vendida">Vendida</option>
-            <option value="Rentada">Rentada</option>
-          </select>
-          <button type="submit">Actualizar Casa</button>
-        </form>
-      )}
-      <h2>Registrar Nueva Casa</h2>
-      <form onSubmit={handleNewHouseSubmit}>
-        <input
-          type="text"
-          placeholder="Título"
-          value={newHouse.title}
-          onChange={(e) => setNewHouse({ ...newHouse, title: e.target.value })}
-        />
-        <input
-          type="text"
-          placeholder="Descripción"
-          value={newHouse.description}
-          onChange={(e) => setNewHouse({ ...newHouse, description: e.target.value })}
-        />
-        <input
-          type="number"
-          placeholder="Precio"
-          value={newHouse.price}
-          onChange={(e) => setNewHouse({ ...newHouse, price: e.target.value })}
-        />
-        <input
-          type="text"
-          placeholder="Ubicación"
-          value={newHouse.location}
-          onChange={(e) => setNewHouse({ ...newHouse, location: e.target.value })}
-        />
-        <select
-          value={newHouse.status}
-          onChange={(e) => setNewHouse({ ...newHouse, status: e.target.value })}
-        >
-          <option value="Libre">Libre</option>
-          <option value="Vendida">Vendida</option>
-          <option value="Rentada">Rentada</option>
-        </select>
-        <button type="submit">Registrar Casa</button>
-      </form>
-      <h2>Lista de Casas</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Título</th>
-            <th>Descripción</th>
-            <th>Precio</th>
-            <th>Ubicación</th>
-            <th>Imagen</th>
-            <th>Estado</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          {houses.map((house) => (
-            <tr key={house._id}>
-              <td>{house.title}</td>
-              <td>{house.description}</td>
-              <td>{house.price}</td>
-              <td>{house.location}</td>
-              <td>
-                {house.imageUrl && <img src={house.imageUrl} alt={house.title} width="100" />}
-              </td>
-              <td>{house.status}</td>
-              <td>
-                <button onClick={() => handleEdit(house)}>Editar</button>
-                <button onClick={() => handleDelete(house._id)}>Eliminar</button>
-              </td>
+      <Button variant="primary" onClick={handleShow}>
+        Agregar Casa
+      </Button>
+      <div className="house-table-container">
+        <table className="table table-striped">
+          <thead>
+            <tr>
+              <th>Título</th>
+              <th>Descripción</th>
+              <th>Precio</th>
+              <th>Ubicación</th>
+              <th>Imagen</th>
+              <th>Status</th>
+              <th>Acciones</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {houses.map((house) => (
+              <tr key={house._id}>
+                <td>{house.title}</td>
+                <td>{house.description}</td>
+                <td>{house.price}</td>
+                <td>{house.location}</td>
+                <td><img src={house.imageUrl} alt={house.title} className="house-image" /></td>
+                <td>
+                  <span className={`chip ${house.status.toLowerCase()}`}>
+                    {house.status}
+                  </span>
+                </td>
+                <td>
+                  <Button
+                    variant="warning"
+                    onClick={() => handleEditHouse(house)}
+                    className="m-1"
+                  >
+                    Editar
+                  </Button>
+                  <Button
+                    variant="danger"
+                    onClick={() => handleDeleteHouse(house._id)}
+                    className="m-1"
+                  >
+                    Eliminar
+                  </Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <Modal show={show} onHide={handleClose}>
+        <Modal.Header closeButton>
+          <Modal.Title>{editMode ? 'Editar Casa' : 'Agregar Casa'}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Form.Group>
+              <Form.Label>Título</Form.Label>
+              <Form.Control
+                type="text"
+                name="title"
+                value={editMode ? currentHouse.title : newHouse.title}
+                onChange={handleInputChange}
+              />
+            </Form.Group>
+            <Form.Group>
+              <Form.Label>Descripción</Form.Label>
+              <Form.Control
+                type="text"
+                name="description"
+                value={editMode ? currentHouse.description : newHouse.description}
+                onChange={handleInputChange}
+              />
+            </Form.Group>
+            <Form.Group>
+              <Form.Label>Precio</Form.Label>
+              <Form.Control
+                type="number"
+                name="price"
+                value={editMode ? currentHouse.price : newHouse.price}
+                onChange={handleInputChange}
+              />
+            </Form.Group>
+            <Form.Group>
+              <Form.Label>Ubicación</Form.Label>
+              <Form.Control
+                type="text"
+                name="location"
+                value={editMode ? currentHouse.location : newHouse.location}
+                onChange={handleInputChange}
+              />
+            </Form.Group>
+            <Form.Group>
+              <Form.Label>Status</Form.Label>
+              <Form.Control
+                as="select"
+                name="status"
+                value={editMode ? currentHouse.status : newHouse.status}
+                onChange={handleInputChange}
+              >
+                <option value="Libre">Libre</option>
+                <option value="Rentada">Rentada</option>
+                <option value="Vendida">Vendida</option>
+              </Form.Control>
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleClose}>
+            Cerrar
+          </Button>
+          <Button variant="primary" onClick={editMode ? handleUpdateHouse : handleAddHouse}>
+            Guardar Cambios
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };

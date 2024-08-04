@@ -1,48 +1,54 @@
-/* frontend/src/components/styles/HouseManagement.css */
-
+/* HouseManagement.css */
 .house-management-container {
   padding: 20px;
+  margin-left: 250px; /* Ajusta este valor según el ancho del sidebar */
 }
 
-.house-management-container h1,
-.house-management-container h2 {
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-.house-management-container form {
-  margin-bottom: 40px;
-  padding: 20px;
-  border: 1px solid #ccc;
-  border-radius: 10px;
-}
-
-.house-management-container input,
-.house-management-container select,
-.house-management-container button {
-  display: block;
-  width: 100%;
-  margin-bottom: 10px;
-  padding: 10px;
-}
-
-.house-management-container table {
-  width: 100%;
-  border-collapse: collapse;
+.house-table-container {
   margin-top: 20px;
 }
 
-.house-management-container th,
-.house-management-container td {
-  padding: 10px;
-  text-align: left;
-  border: 1px solid #ddd;
+.house-image {
+  width: 100px;
+  height: auto;
+  border-radius: 10px;
 }
 
-.house-management-container th {
-  background-color: #f4f4f4;
+.chip {
+  display: inline-block;
+  padding: 0.25em 0.5em;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 0.25rem;
+  text-transform: uppercase;
 }
 
-.house-management-container img {
-  max-width: 100px;
+.chip.libre {
+  background-color: #28a745;
+  color: white;
+}
+
+.chip.rentada {
+  background-color: #ffc107;
+  color: black;
+}
+
+.chip.vendida {
+  background-color: #dc3545;
+  color: white;
+}
+
+@media (max-width: 768px) {
+  .house-management-container {
+    margin-left: 0;
+    padding: 10px;
+  }
+
+  .house-table-container {
+    overflow-x: auto;
+  }
+
+  .table {
+    width: 100%;
+  }
 }

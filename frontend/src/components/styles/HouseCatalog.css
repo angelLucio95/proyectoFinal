@@ -1,5 +1,7 @@
+/* HouseCatalog.css */
 .house-catalog-container {
   padding: 20px;
+  margin-left: 250px; /* Ajusta este valor según el ancho del sidebar */
 }
 
 .house-catalog {
@@ -16,6 +18,12 @@
   width: 300px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   text-align: center;
+  transition: transform 0.3s;
+  margin: 10px;
+}
+
+.house-card:hover {
+  transform: translateY(-10px);
 }
 
 .house-card img {
@@ -46,6 +54,17 @@
   background-color: #218838;
 }
 
+@media (max-width: 768px) {
+  .house-catalog-container {
+    margin-left: 0;
+    padding: 10px;
+  }
+
+  .house-card {
+    width: 100%;
+  }
+}
+
 .modal {
   position: fixed;
   top: 0;
@@ -59,8 +78,11 @@
 }
 
 .modal-content {
-  background: blue;
+  background: white;
   padding: 20px;
   border-radius: 8px;
   text-align: center;
+  width: 80%;
+  max-width: 500px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }

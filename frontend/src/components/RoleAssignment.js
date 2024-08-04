@@ -1,22 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import './styles/RoleAssignment.css';
 
 const RoleAssignment = () => {
   const [users, setUsers] = useState([]);
   const [roles, setRoles] = useState([]);
-  const [selectedUser, setSelectedUser] = useState(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   useEffect(() => {
     fetchUsers();
     fetchRoles();
+    handleSidebarToggle();
   }, []);
 
   const fetchUsers = async () => {
     const token = localStorage.getItem('token');
     try {
       const res = await axios.get('http://localhost:5001/api/users/all', {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
       setUsers(res.data);
     } catch (err) {
@@ -28,7 +30,7 @@ const RoleAssignment = () => {
     const token = localStorage.getItem('token');
     try {
       const res = await axios.get('http://localhost:5001/api/roles', {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
       setRoles(res.data);
     } catch (err) {
@@ -36,31 +38,42 @@ const RoleAssignment = () => {
     }
   };
 
+  const handleSidebarToggle = () => {
+    const sidebarToggle = document.getElementById('sidebar-toggle');
+    if (sidebarToggle) {
+      sidebarToggle.addEventListener('click', () => {
+        setIsSidebarOpen(!isSidebarOpen);
+      });
+    }
+  };
+
   const handleRoleChange = async (userId, roleId) => {
     const token = localStorage.getItem('token');
     try {
-      await axios.put(`http://localhost:5001/api/users/${userId}/role`, {
-        roleId
-      }, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      toast.success('Rol asignado correctamente');
+      await axios.put(
+        `http://localhost:5001/api/users/${userId}/role`,
+        { roleId },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      toast.success('Rol actualizado correctamente');
       fetchUsers();
     } catch (err) {
-      toast.error('Error al asignar el rol');
+      toast.error('Error al actualizar el rol');
     }
   };
 
   return (
-    <div>
+    <div className={`role-assignment-container ${isSidebarOpen ? 'sidebar-open' : 'sidebar-closed'}`}>
       <h1>Asignación de Roles</h1>
-      <table>
+      <table className="user-table">
         <thead>
           <tr>
-            <th>Username</th>
+            <th>Nombre de Usuario</th>
             <th>Email</th>
             <th>Rol Actual</th>
-            <th>Nuevo Rol</th>
+            <th>Asignar Nuevo Rol</th>
           </tr>
         </thead>
         <tbody>
@@ -68,11 +81,13 @@ const RoleAssignment = () => {
             <tr key={user._id}>
               <td>{user.username}</td>
               <td>{user.email}</td>
-              <td>{user.role.name}</td>
+              <td>
+                <span className="chip chip-role">{user.role.name}</span>
+              </td>
               <td>
                 <select
+                  value={user.role._id}
                   onChange={(e) => handleRoleChange(user._id, e.target.value)}
-                  defaultValue={user.role._id}
                 >
                   {roles.map((role) => (
                     <option key={role._id} value={role._id}>
