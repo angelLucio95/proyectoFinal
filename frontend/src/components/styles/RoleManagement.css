@@ -1,0 +1,152 @@
+/* RoleManagement.css */
+.role-management-container {
+    transition: margin-left 0.3s;
+    padding: 20px;
+  }
+  
+  .role-management-container.sidebar-open {
+    margin-left: 250px;
+  }
+  
+  .role-management-container.sidebar-closed {
+    margin-left: 0;
+  }
+  
+  .add-role-btn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    margin-bottom: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  
+  .add-role-btn:hover {
+    background-color: #0056b3;
+  }
+  
+  .role-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+  }
+  
+  .role-table th, .role-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+  
+  .role-table th {
+    background-color: #f2f2f2;
+  }
+  
+  .edit-btn, .delete-btn {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    margin-right: 10px;
+  }
+  
+  .edit-btn:hover {
+    color: #007bff;
+  }
+  
+  .delete-btn:hover {
+    color: #dc3545;
+  }
+  
+  .role-form {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 300px;
+    height: 100%;
+    background-color: #fff;
+    box-shadow: -2px 0 5px rgba(0,0,0,0.5);
+    padding: 20px;
+    overflow-y: auto;
+  }
+  
+  .role-form h2 {
+    margin-top: 0;
+  }
+  
+  .role-form label {
+    display: block;
+    margin: 10px 0 5px;
+  }
+  
+  .role-form input, .role-form select {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .role-form .permissions {
+    margin-bottom: 20px;
+  }
+  
+  .role-form .permissions div {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .chip {
+    display: inline-block;
+    padding: 0.25em 0.4em;
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 1;
+    color: #fff;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: 0.25rem;
+  }
+  
+  .chip-read {
+    background-color: #28a745;
+  }
+  
+  .chip-create {
+    background-color: #007bff;
+  }
+  
+  .chip-update {
+    background-color: #ffc107;
+  }
+  
+  .chip-delete {
+    background-color: #dc3545;
+  }
+  
+  .role-form button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px;
+    margin-right: 10px;
+    cursor: pointer;
+  }
+  
+  .role-form button[type="button"] {
+    background-color: #6c757d;
+  }
+  
+  .role-form button:hover {
+    opacity: 0.9;
+  }
+  
+  h3 {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  
