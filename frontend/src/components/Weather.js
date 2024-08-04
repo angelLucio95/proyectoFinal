@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import './styles/Weather.css';
@@ -7,12 +7,26 @@ const Weather = () => {
   const [city, setCity] = useState('');
   const [weatherData, setWeatherData] = useState([]);
 
+  useEffect(() => {
+    fetchRandomWeather();
+  }, []);
+
+  const fetchRandomWeather = async () => {
+    try {
+      const response = await axios.get('http://localhost:5001/api/weather/random');
+      setWeatherData(response.data);
+      toast.success('Datos meteorológicos obtenidos correctamente');
+    } catch (error) {
+      toast.error('Error al obtener los datos meteorológicos');
+    }
+  };
+
   const fetchWeather = async () => {
     try {
       const response = await axios.get('http://localhost:5001/api/weather', {
         params: { city },
       });
-      setWeatherData(response.data);
+      setWeatherData(prevData => [...prevData, response.data[0]]);
       toast.success('Datos meteorológicos obtenidos correctamente');
     } catch (error) {
       toast.error('Error al obtener los datos meteorológicos');
