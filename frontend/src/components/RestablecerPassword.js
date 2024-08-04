@@ -14,6 +14,9 @@ const RestablecerPassword = () => {
       const res = await axios.post('http://localhost:5001/api/users/forgot-password', { email });
       setMessage(res.data.message);
       toast.success('Correo de restablecimiento enviado.');
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 5000);
     } catch (err) {
       setMessage('Error al enviar el correo de restablecimiento');
       toast.error('Error al enviar el correo de restablecimiento.');

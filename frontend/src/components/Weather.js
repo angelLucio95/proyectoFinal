@@ -6,6 +6,7 @@ import './styles/Weather.css';
 const Weather = () => {
   const [city, setCity] = useState('');
   const [weatherData, setWeatherData] = useState([]);
+  const [toastShown, setToastShown] = useState(false);
 
   useEffect(() => {
     fetchRandomWeather();
@@ -15,9 +16,15 @@ const Weather = () => {
     try {
       const response = await axios.get('http://localhost:5001/api/weather/random');
       setWeatherData(response.data);
-      toast.success('Datos meteorológicos obtenidos correctamente');
+      if (!toastShown) {
+        toast.success('Datos meteorológicos obtenidos correctamente');
+        setToastShown(true);
+      }
     } catch (error) {
-      toast.error('Error al obtener los datos meteorológicos');
+      if (!toastShown) {
+        toast.error('Error al obtener los datos meteorológicos');
+        setToastShown(true);
+      }
     }
   };
 
@@ -26,7 +33,13 @@ const Weather = () => {
       const response = await axios.get('http://localhost:5001/api/weather', {
         params: { city },
       });
-      setWeatherData(prevData => [response.data[0], ...prevData.slice(0, 4)]);
+      setWeatherData(prevData => {
+        const newData = [...prevData, response.data[0]];
+        if (newData.length > 6) {
+          newData.shift();
+        }
+        return newData;
+      });
       toast.success('Datos meteorológicos obtenidos correctamente');
     } catch (error) {
       toast.error('Error al obtener los datos meteorológicos');
@@ -35,6 +48,7 @@ const Weather = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setToastShown(false);
     fetchWeather();
   };
 

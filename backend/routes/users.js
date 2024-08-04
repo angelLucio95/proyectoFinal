@@ -15,6 +15,7 @@ const validatePassword = (password) => {
   const hasLowerCase = /[a-z]/;
   const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/;
   const noConsecutiveChars = /(.)\1\1/;
+  const noSequentialChars = /(012|123|234|345|456|567|678|789|890|abc|bcd|cde|def|efg|fgh|ghi|hij|ijk|jkl|klm|lmn|mno|nop|opq|pqr|qrs|rst|stu|tuv|uvw|vwx|wxy|xyz)/i;
 
   if (password.length < minLength) {
     return 'La contraseña debe tener al menos 8 caracteres.';
@@ -33,6 +34,9 @@ const validatePassword = (password) => {
   }
   if (noConsecutiveChars.test(password)) {
     return 'La contraseña no debe contener caracteres consecutivos.';
+  }
+  if (noSequentialChars.test(password)) {
+    return 'La contraseña no debe contener secuencias de números o letras consecutivas.';
   }
   return null;
 };
@@ -89,7 +93,7 @@ router.get('/confirm/:token', async (req, res) => {
     user.isActive = true; 
     await user.save();
 
-    res.redirect('/login');
+    res.redirect(`${process.env.BASE_URL_FRONT}/login`);
   } catch (error) {
     console.error(error);
     res.status(500).send('Enlace inválido o expirado');
@@ -257,7 +261,7 @@ router.put('/:id', [auth, checkPermission('updateUsers')], async (req, res) => {
 
     user.username = username || user.username;
 
-    // Si el correo ha cambiado, enviar confirmación de correo
+    // Si el correo ha cambiado, enviar confirmación de correo y desactivar el usuario
     if (email && email !== user.email) {
       user.email = email;
       user.isActive = false; // Desactivar hasta que el nuevo correo sea confirmado
@@ -269,7 +273,8 @@ router.put('/:id', [auth, checkPermission('updateUsers')], async (req, res) => {
     if (phone) user.phone = phone;
     if (gender) user.gender = gender;
     if (address) user.address = address;
-    if (typeof isActive !== 'undefined') user.isActive = isActive;
+    // Remover la posibilidad de actualizar isActive manualmente
+    // if (typeof isActive !== 'undefined') user.isActive = isActive;
 
     await user.save();
     res.json({ message: 'Usuario actualizado correctamente' });

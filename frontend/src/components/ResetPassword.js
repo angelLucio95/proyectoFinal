@@ -21,6 +21,9 @@ const ResetPassword = () => {
       const res = await axios.post(`http://localhost:5001/api/users/reset-password/${token}`, { password });
       setMessage(res.data.message);
       toast.success('Contraseña restablecida correctamente.');
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 5000);
     } catch (err) {
       setMessage('Error al restablecer la contraseña.');
       toast.error('Error al restablecer la contraseña.');
