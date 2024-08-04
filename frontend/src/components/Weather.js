@@ -35,9 +35,9 @@ const Weather = () => {
       </form>
       {weatherData && (
         <div>
-          <h2>Clima en {weatherData.name}</h2>
-          <p>Temperatura: {Math.round(weatherData.main.temp - 273.15)}°C</p>
-          <p>Condición: {weatherData.weather[0].description}</p>
+          <h2>Clima en {weatherData.location.name}</h2>
+          <p>Temperatura: {weatherData.current.temperature}°C</p>
+          <p>Condición: {weatherData.current.weather_descriptions[0]}</p>
         </div>
       )}
     </div>
