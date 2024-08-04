@@ -6,6 +6,7 @@ import UserManagement from './UserManagement';
 import RoleManagement from './RoleManagement';
 import RoleAssignment from './RoleAssignment';
 import HouseManagement from './HouseManagement';
+import HouseCatalog from './HouseCatalog';
 
 const Dashboard = () => {
   return (
@@ -18,6 +19,7 @@ const Dashboard = () => {
           <Route path="role-management" element={<RoleManagement />} />
           <Route path="role-assignment" element={<RoleAssignment />} />
           <Route path="house-management" element={<HouseManagement />} />
+          <Route path="house-catalog" element={<HouseCatalog />} /> {/* Agrega la nueva ruta */}
           {/* Agrega más rutas aquí para futuros componentes */}
         </Routes>
       </div>

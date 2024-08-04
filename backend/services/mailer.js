@@ -52,7 +52,24 @@ const sendResetPasswordEmail = (to, token) => {
     });
 };
 
+const sendVisitEmail = async (email, house, date) => {
+    const mailOptions = {
+      from: process.env.EMAIL_USERNAME,
+      to: email,
+      subject: 'Visita agendada',
+      text: `Has agendado una visita a la casa "${house.title}" en la ubicación ${house.location} para la fecha ${date}.`
+    };
+  
+    try {
+      await transporter.sendMail(mailOptions);
+      console.log('Correo de visita enviado correctamente');
+    } catch (error) {
+      console.error('Error al enviar el correo de visita:', error);
+    }
+  };
+
 module.exports = {
     sendConfirmationEmail,
-    sendResetPasswordEmail
+    sendResetPasswordEmail,
+    sendVisitEmail
 };

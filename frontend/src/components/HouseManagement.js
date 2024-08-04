@@ -1,7 +1,8 @@
+// frontend/src/components/HouseManagement.js
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import './styles/HouseManagement.css'; // Ajusta la ruta según tu estructura de carpetas
+import './styles/HouseManagement.css';
 
 const HouseManagement = () => {
   const [houses, setHouses] = useState([]);
@@ -11,6 +12,7 @@ const HouseManagement = () => {
     description: '',
     price: '',
     location: '',
+    status: 'Libre',
   });
 
   useEffect(() => {
@@ -98,6 +100,7 @@ const HouseManagement = () => {
         description: '',
         price: '',
         location: '',
+        status: 'Libre',
       });
       fetchHouses();
     } catch (err) {
@@ -106,10 +109,10 @@ const HouseManagement = () => {
   };
 
   return (
-    <div>
+    <div className="house-management-container">
       <h1>Gestión de Casas</h1>
       {selectedHouse && (
-        <form onSubmit={handleSubmit} className="form">
+        <form onSubmit={handleSubmit}>
           <input
             type="text"
             placeholder="Título"
@@ -134,11 +137,19 @@ const HouseManagement = () => {
             value={selectedHouse.location}
             onChange={(e) => setSelectedHouse({ ...selectedHouse, location: e.target.value })}
           />
+          <select
+            value={selectedHouse.status}
+            onChange={(e) => setSelectedHouse({ ...selectedHouse, status: e.target.value })}
+          >
+            <option value="Libre">Libre</option>
+            <option value="Vendida">Vendida</option>
+            <option value="Rentada">Rentada</option>
+          </select>
           <button type="submit">Actualizar Casa</button>
         </form>
       )}
       <h2>Registrar Nueva Casa</h2>
-      <form onSubmit={handleNewHouseSubmit} className="form">
+      <form onSubmit={handleNewHouseSubmit}>
         <input
           type="text"
           placeholder="Título"
@@ -163,10 +174,18 @@ const HouseManagement = () => {
           value={newHouse.location}
           onChange={(e) => setNewHouse({ ...newHouse, location: e.target.value })}
         />
+        <select
+          value={newHouse.status}
+          onChange={(e) => setNewHouse({ ...newHouse, status: e.target.value })}
+        >
+          <option value="Libre">Libre</option>
+          <option value="Vendida">Vendida</option>
+          <option value="Rentada">Rentada</option>
+        </select>
         <button type="submit">Registrar Casa</button>
       </form>
       <h2>Lista de Casas</h2>
-      <table className="house-table">
+      <table>
         <thead>
           <tr>
             <th>Título</th>
@@ -174,6 +193,7 @@ const HouseManagement = () => {
             <th>Precio</th>
             <th>Ubicación</th>
             <th>Imagen</th>
+            <th>Estado</th>
             <th>Acciones</th>
           </tr>
         </thead>
@@ -185,8 +205,9 @@ const HouseManagement = () => {
               <td>{house.price}</td>
               <td>{house.location}</td>
               <td>
-                {house.imageUrl && <img src={house.imageUrl} alt={house.title} className="house-image" />}
+                {house.imageUrl && <img src={house.imageUrl} alt={house.title} width="100" />}
               </td>
+              <td>{house.status}</td>
               <td>
                 <button onClick={() => handleEdit(house)}>Editar</button>
                 <button onClick={() => handleDelete(house._id)}>Eliminar</button>

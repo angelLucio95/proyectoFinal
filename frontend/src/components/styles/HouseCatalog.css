@@ -1,0 +1,48 @@
+/* frontend/src/components/styles/HouseCatalog.css */
+.house-catalog-container {
+  padding: 20px;
+}
+
+.house-catalog {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+}
+
+.house-card {
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 20px;
+  width: 300px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.house-card img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 10px;
+}
+
+.house-card h3 {
+  margin: 10px 0;
+}
+
+.house-card p {
+  margin: 5px 0;
+}
+
+.house-card button {
+  padding: 10px 20px;
+  border: none;
+  background-color: #28a745;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.house-card button:hover {
+  background-color: #218838;
+}

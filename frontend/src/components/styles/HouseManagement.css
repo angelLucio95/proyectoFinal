@@ -1,22 +1,48 @@
+/* frontend/src/components/styles/HouseManagement.css */
 
-.house-table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  
-  .house-table th, .house-table td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: left;
-  }
-  
-  .house-table th {
-    background-color: #f2f2f2;
-    color: black;
-  }
-  
-  .house-table td img.house-image {
-    width: 150px;
-    height: auto;
-  }
-  
+.house-management-container {
+  padding: 20px;
+}
+
+.house-management-container h1,
+.house-management-container h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.house-management-container form {
+  margin-bottom: 40px;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+}
+
+.house-management-container input,
+.house-management-container select,
+.house-management-container button {
+  display: block;
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 10px;
+}
+
+.house-management-container table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.house-management-container th,
+.house-management-container td {
+  padding: 10px;
+  text-align: left;
+  border: 1px solid #ddd;
+}
+
+.house-management-container th {
+  background-color: #f4f4f4;
+}
+
+.house-management-container img {
+  max-width: 100px;
+}

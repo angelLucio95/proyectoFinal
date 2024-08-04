@@ -1,3 +1,4 @@
+// backend/models/House.js
 const mongoose = require('mongoose');
 
 const HouseSchema = new mongoose.Schema({
@@ -5,8 +6,8 @@ const HouseSchema = new mongoose.Schema({
   description: { type: String, required: true },
   price: { type: Number, required: true },
   location: { type: String, required: true },
-  imageUrl: { type: String },
-  date: { type: Date, default: Date.now }
+  imageUrl: { type: String, required: true },
+  status: { type: String, enum: ['Libre', 'Vendida', 'Rentada'], default: 'Libre' } // Nuevo campo
 });
 
 module.exports = mongoose.model('House', HouseSchema);
