@@ -1,15 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import './styles/Weather.css'; 
 
 const Weather = () => {
   const [city, setCity] = useState('');
-  const [weatherData, setWeatherData] = useState(null);
+  const [weatherData, setWeatherData] = useState([]);
 
-  const fetchWeather = async () => {
+  useEffect(() => {
+    fetchWeather();
+  }, []);
+
+  const fetchWeather = async (searchCity) => {
     try {
-      const response = await axios.get(`http://localhost:5001/api/weather`, { params: { city } });
-      setWeatherData(response.data);
+      const response = await axios.get(`http://localhost:5001/api/weather`, {
+        params: { city: searchCity }
+      });
+      if (searchCity) {
+        setWeatherData([response.data[0], ...weatherData]);
+      } else {
+        setWeatherData(response.data);
+      }
       toast.success('Datos meteorológicos obtenidos correctamente');
     } catch (error) {
       toast.error('Error al obtener los datos meteorológicos');
@@ -18,7 +29,7 @@ const Weather = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    fetchWeather();
+    fetchWeather(city);
   };
 
   return (
@@ -33,13 +44,16 @@ const Weather = () => {
         />
         <button type="submit">Obtener Clima</button>
       </form>
-      {weatherData && (
-        <div>
-          <h2>Clima en {weatherData.location.name}</h2>
-          <p>Temperatura: {weatherData.current.temperature}°C</p>
-          <p>Condición: {weatherData.current.weather_descriptions[0]}</p>
-        </div>
-      )}
+      <div className="weather-cards">
+        {weatherData.map((weather, index) => (
+          <div key={index} className="weather-card">
+            <h2>{weather.location.name}</h2>
+            <p>Temperatura: {Math.round(weather.current.temperature)}°C</p>
+            <p>Condición: {weather.current.weather_descriptions[0]}</p>
+            <img src={weather.current.weather_icons[0]} alt="Weather icon" />
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
