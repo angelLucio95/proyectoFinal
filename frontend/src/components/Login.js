@@ -17,7 +17,7 @@ const Login = () => {
       const res = await axios.post('http://localhost:5001/api/users/login', { email, password });
       localStorage.setItem('token', res.data.token);
       toast.success('Inicio de sesión exitoso');
-      navigate('/dashboard');
+      navigate('/dashboard/weather');
     } catch (err) {
       const errorMessage = err.response?.data?.message || 'Error al iniciar sesión';
       toast.error(errorMessage);
